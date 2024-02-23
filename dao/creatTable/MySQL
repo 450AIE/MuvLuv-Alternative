@@ -1,0 +1,102 @@
+#外键约束都是乱加的，因为用不来
+
+-- auto-generated definition
+create table book_comment
+(
+    post_id      bigint auto_increment comment '序列号'
+        primary key,
+    book_id      bigint               not null comment '书籍ID',
+    publish_time bigint               not null comment '发布时间',
+    content      varchar(512)         not null comment '书评',
+    user_id      bigint               not null comment '用户ID，未经雪花算法加密的ID',
+    praise_count int        default 0 not null comment '书评点赞数目',
+    is_praised   tinyint(1) default 0 not null comment '用户是否点赞该书评',
+    is_focus     tinyint(1) default 0 not null comment '用户是否关注了发布书评的用户',
+    constraint book_comment_users_id_fk
+        foreign key (user_id) references users (id)
+            on update cascade on delete cascade
+)
+    comment '书评';
+
+-- auto-generated definition
+create table books
+(
+    book_id      bigint       not null comment '书籍ID'
+        primary key,
+    name         varchar(30)  null comment '书名',
+    is_star      tinyint(1)   not null comment '是否收藏',
+    author       varchar(30)  not null comment '作者',
+    comment_num  bigint       not null comment '评论数量',
+    score        tinyint      not null comment '书籍评分',
+    cover        varchar(256) not null comment '封面URL',
+    publish_time varchar(12)  not null comment '发布时间',
+    link         varchar(128) not null comment '书籍链接',
+    label        varchar(32)  not null comment '标签'
+);
+
+-- auto-generated definition
+create table is_starbook
+(
+    ID      bigint auto_increment comment '序列号'
+        primary key,
+    user_id bigint not null comment '用户ID，注意，是未经过雪花算法加密的ID',
+    book_id bigint not null comment '书籍ID',
+    constraint is_starbook_books_book_id_fk
+        foreign key (book_id) references books (book_id)
+            on update cascade on delete cascade,
+    constraint is_starbook_users_id_fk
+        foreign key (user_id) references users (id)
+            on update cascade on delete cascade
+);
+
+-- auto-generated definition
+create table is_thumbsup_comment
+(
+    ID      int auto_increment comment '序列号'
+        primary key,
+    user_id bigint not null comment '点赞用户的ID',
+    post_id bigint not null comment '被点赞的评论ID'
+);
+
+
+-- auto-generated definition
+create table user_care
+(
+    ID             bigint auto_increment
+        primary key,
+    caring_user_id bigint not null comment '关注者ID',
+    cared_user_id  bigint not null comment '被关注者ID',
+    constraint user_care_cared_user_id_uindex
+        unique (cared_user_id),
+    constraint user_care_caring_user_id_uindex
+        unique (caring_user_id)
+);
+
+create index user_care__cared_user_id_index
+    on user_care (cared_user_id);
+
+create index user_care_cared_user_id_index
+    on user_care (cared_user_id);
+
+create index user_care_caring_user_id_index
+    on user_care (caring_user_id);
+
+-- auto-generated definition
+create table users
+(
+    id           bigint auto_increment comment '用户编号'
+        primary key,
+    user_id      bigint                                                                                                     not null comment '用户ID',
+    password     varchar(128)                                                                                               not null comment '用户密码',
+    gender       varchar(2)   default '未知'                                                                                null comment '用户性别',
+    nickname     varchar(10)                                                                                                not null comment '昵称',
+    qq           bigint                                                                                                     null comment 'QQ号',
+    birthday     date                                                                                                       null comment '用户生日',
+    email        varchar(30)                                                                                                null comment '用户邮箱',
+    avatar       varchar(128) default 'https://img.3dmgame.com/uploads/images/thumbkwdfirst/20180530/1527663132_332906.jpg' null comment '用户头像',
+    introduction varchar(100)                                                                                               null comment '用户简介',
+    phone        bigint                                                                                                     null comment '用户电话'
+);
+
+create index users_id_user_id_index
+    on users (id, user_id);
